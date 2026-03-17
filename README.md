@@ -1,47 +1,46 @@
-# Spotify Adblock Flatpak
+# 🎧 Spotify Adblock Flatpak
 
-A lightweight Bash script for Linux that automatically detects and skips Spotify ads in the Flatpak version by restarting the client.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
+[![Platform](https://img.shields.io/badge/Platform-Linux-FCC624.svg)](https://www.linux.org/)
+
+A robust, ultra-lightweight Bash script for Linux that automatically detects and skips audio advertisements in the Flatpak version of Spotify. It works silently in the background, ensuring an uninterrupted listening experience without modifying the Spotify binary itself.
+
+---
+
+## 📑 Table of Contents
+- [Key Features](#-key-features)
+- [Prerequisites & Dependencies](#-prerequisites--dependencies)
+- [Installation & Usage](#-installation--usage)
+  - [Automated Installation](#option-a-automated-installation-recommended)
+  - [Manual Installation](#option-b-detailed-manual-installation)
+- [Updating the Script](#-updating)
+- [How It Works (Under the Hood)](#-how-it-works-under-the-hood)
+- [Troubleshooting & FAQ](#️-troubleshooting--faq)
+- [Uninstallation](#-uninstallation)
+- [Contributing](#-contributing)
+- [License & Disclaimer](#️-license--disclaimer)
 
 ---
 
-## 🚀 How it works
-The script monitors Spotify's metadata via `playerctl`. When an advertisement is detected (track ID containing `spotify/ad`), the script automatically:
-* **Terminates** the Spotify Flatpak process.
-* **Restarts** the client in the background (minimized).
-* **Resumes** playback of the next actual song.
+## ✨ Key Features
 
-## 📋 Prerequisites
-To run this script, you need to have the following installed:
-
-| Tool | Purpose |
-| :--- | :--- |
-| **Spotify** | Must be the [Flatpak version](https://flathub.org/apps/details/com.spotify.Client) |
-| **playerctl** | To monitor and control media playback |
-| **libnotify** | To display desktop notifications |
-
-## 🛠 Installation & Usage
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/Petr200/Spotify-adblock-flatpak.git](https://github.com/Petr200/Spotify-adblock-flatpak.git)
-    cd Spotify-adblock-flatpak
-    ```
-
-2.  **Make the script executable:**
-    ```bash
-    chmod +x spotify-skipper.sh
-    ```
-
-3.  **Run the script:**
-    ```bash
-    ./spotify-skipper.sh
-    ```
-
-## 📝 Script Details
-The script is designed for the `com.spotify.Client` Flatpak ID. It uses a loop to follow MPRIS metadata changes, ensuring minimal CPU usage while providing instant ad skipping.
-
-## ⚖️ License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+* **Zero Modifications:** Does not alter Spotify's core files, avoiding potential account bans or breaking updates.
+* **Minimal Resource Usage:** Relies on event-driven MPRIS metadata tracking (`playerctl --follow`) rather than heavy CPU polling.
+* **Seamless Resumption:** Instantly kills the client upon ad detection and restarts it minimized, immediately playing the next track in your queue.
+* **Smart Loop Prevention:** Checks the last played song to ensure it doesn't get stuck in an endless restart loop if Spotify struggles to load.
+* **Set-and-Forget:** Includes an automated installer that sets up the script to run quietly on system boot.
+* **Native Notifications:** Integrates with your desktop environment to let you know exactly when an ad was intercepted.
 
 ---
-> **Disclaimer:** This script is for educational purposes only. It is not affiliated with or endorsed by Spotify.
+
+## 📋 Prerequisites & Dependencies
+
+Before running the script, ensure you have the **Flatpak version of Spotify** installed. If you installed Spotify via `apt`, `pacman`, or `snap`, this specific script will not work.
+
+The script also relies on `playerctl` to read Spotify's metadata and `libnotify` to display native desktop notifications. Install the required dependencies based on your Linux distribution:
+
+**Ubuntu, Pop!_OS, Linux Mint, Debian:**
+```bash
+sudo apt update
+sudo apt install playerctl libnotify-bin
