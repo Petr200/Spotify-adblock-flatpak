@@ -144,3 +144,4 @@ jobs:
             echo "Loop prevented OK ✅"
           else
             exit 1
+          fi
