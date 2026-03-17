@@ -3,7 +3,6 @@ name: Strict Multi-Distro Test
 on:
   push:
   pull_request:
-
 jobs:
 
 # =========================
@@ -17,6 +16,12 @@ jobs:
 
       - name: Install deps
         run: sudo apt update && sudo apt install -y playerctl libnotify-bin shellcheck
+
+      - name: Test install.sh (Syntax & Shellcheck)
+        run: |
+          echo "Checking install.sh before running..."
+          bash -n install.sh
+          shellcheck install.sh
 
       - name: Run install script
         run: |
@@ -37,7 +42,6 @@ jobs:
           
           echo "3. Shellcheck..."
           shellcheck "$TARGET"
-          shellcheck install.sh
           
           echo "4. Fake Spotify simulation..."
           mkdir -p fakebin
@@ -63,7 +67,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install tools
-        run: dnf install -y git bash curl playerctl libnotify sudo
+        # Přidán balíček shellcheck
+        run: dnf install -y git bash curl playerctl libnotify sudo shellcheck
+
+      - name: Test install.sh (Syntax & Shellcheck)
+        run: |
+          echo "Checking install.sh before running..."
+          bash -n install.sh
+          shellcheck install.sh
 
       - name: Run install script
         run: |
@@ -82,7 +93,10 @@ jobs:
           echo "2. Syntax check..."
           bash -n "$TARGET"
           
-          echo "3. Fake Spotify simulation..."
+          echo "3. Shellcheck..."
+          shellcheck "$TARGET"
+          
+          echo "4. Fake Spotify simulation..."
           mkdir -p fakebin
           echo '#!/bin/bash' > fakebin/playerctl
           echo 'echo "spotify/ad/test"' >> fakebin/playerctl
@@ -106,9 +120,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Arch
+        # Přidán balíček shellcheck
         run: |
           pacman -Sy --noconfirm
-          pacman -S --noconfirm git bash curl playerctl libnotify sudo
+          pacman -S --noconfirm git bash curl playerctl libnotify sudo shellcheck
+
+      - name: Test install.sh (Syntax & Shellcheck)
+        run: |
+          echo "Checking install.sh before running..."
+          bash -n install.sh
+          shellcheck install.sh
 
       - name: Run install script
         run: |
@@ -127,7 +148,10 @@ jobs:
           echo "2. Syntax check..."
           bash -n "$TARGET"
           
-          echo "3. Fake Spotify simulation..."
+          echo "3. Shellcheck..."
+          shellcheck "$TARGET"
+          
+          echo "4. Fake Spotify simulation..."
           mkdir -p fakebin
           echo '#!/bin/bash' > fakebin/playerctl
           echo 'echo "spotify/ad/test"' >> fakebin/playerctl
@@ -164,7 +188,7 @@ jobs:
               exit 1
           fi
 
-          if detect_ad "spotify:track:xyz"; then
+          if detect_ad "spotify/track/xyz"; then
               echo "ERROR: False positive ad detection"
               exit 1
           fi
