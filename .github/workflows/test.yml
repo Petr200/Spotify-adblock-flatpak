@@ -102,10 +102,9 @@ jobs:
 
       - name: Test script run
         run: timeout 2 bash spotify-adblock.sh || true
-
-# =========================
-# 🧠 Unit tests (logic)
-# =========================
+ # =========================
+ # 🧠 Unit tests (logic)
+ # =========================
   unit-tests:
     runs-on: ubuntu-latest
 
@@ -114,16 +113,27 @@ jobs:
 
       - name: Test ad detection logic
         run: |
+          set -euo pipefail
+
           detect_ad() {
-            if [[ "$1" == *"spotify/ad"* ]]; then
-              return 0
-            else
-              return 1
-            fi
+              if [[ "$1" == *"spotify/ad"* ]]; then
+                  return 0
+              else
+                  return 1
+              fi
           }
 
-          detect_ad "spotify/ad/123" || exit 1
-          detect_ad "spotify:track:xyz" && exit 1
+          if ! detect_ad "spotify/ad/123"; then
+              echo "ERROR: Ad detection failed"
+              exit 1
+          fi
+
+          if detect_ad "spotify:track:xyz"; then
+              echo "ERROR: False positive ad detection"
+              exit 1
+          fi
+
+          echo "Unit tests passed"
 
       - name: Test loop protection logic
         run: |
@@ -131,7 +141,6 @@ jobs:
           CURRENT="abc"
 
           if [ "$CURRENT" = "$LAST" ]; then
-            echo "Loop prevented OK"
+            echo "Loop prevented OK ✅"
           else
             exit 1
-          fi
