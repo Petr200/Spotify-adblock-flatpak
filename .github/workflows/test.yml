@@ -16,7 +16,7 @@ jobs:
         run: sudo apt update && sudo apt install -y playerctl libnotify-bin
 
       - name: Check script syntax
-        run: bash -n Spotify-adblock.sh
+        run: bash -n spotify-adblock.sh
 
       - name: Check install script syntax
         run: bash -n install.sh
