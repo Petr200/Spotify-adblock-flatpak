@@ -1,11 +1,20 @@
 #!/bin/bash
 
+# Ensure only one instance of the script is running using an exclusive lock (flock)
+# Bash automatically assigns a free file descriptor to LOCK_FD
+exec {LOCK_FD}>/tmp/spotify-adblock.lock
+if ! flock -n "$LOCK_FD"; then
+    # If the file is already locked, notify the user and exit
+    notify-send -t 1600 -i com.spotify.Client -a "Spotify Adblock" "Script is already running in the background."
+    exit 1
+fi
+
 # Initialize variables
 LAST_SONG=""
 CURRENT_SONG=$(playerctl -p spotify metadata mpris:trackid 2>/dev/null)
 
 # Notify that the script has started
-notify-send -t 1600 "Start" "Script started"
+notify-send -t 1600 -i com.spotify.Client -a "Spotify Adblock" "Script started"
 
 # Monitor Spotify metadata changes using playerctl
 playerctl -p spotify metadata mpris:trackid --follow --format "{{mpris:trackid}}" | while read -r CURRENT_SONG; do
@@ -20,7 +29,7 @@ playerctl -p spotify metadata mpris:trackid --follow --format "{{mpris:trackid}}
 
         # Detect advertisement (if trackid contains "spotify/ad")
         if [[ "$CURRENT_SONG" == *"spotify/ad"* ]]; then
-            notify-send -t 1600 -i com.spotify.Client -a "Spotify" "Advertising" "Skipping Advertisement..."
+            notify-send -t 1600 -i com.spotify.Client -a "Spotify Adblock" "Skipping Advertisement..."
 
             # Kill the Spotify Flatpak instance
             flatpak kill com.spotify.Client &
