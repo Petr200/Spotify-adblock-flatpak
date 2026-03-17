@@ -1,4 +1,4 @@
-name: Ultra Strict Multi-Distro Test
+name: Strict Multi-Distro Test
 
 on:
   push:
