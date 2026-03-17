@@ -18,41 +18,37 @@ jobs:
       - name: Install deps
         run: sudo apt update && sudo apt install -y playerctl libnotify-bin shellcheck
 
-      - name: Syntax check
-        run: |
-          bash -n spotify-adblock.sh
-          bash -n install.sh
-
-      - name: Shellcheck
-        run: |
-          shellcheck spotify-adblock.sh
-          shellcheck install.sh
-
-      - name: Test download (404 protection)
-        run: |
-          curl -f -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/spotify-adblock.sh -o test.sh
-          test -s test.sh
-
-      - name: Fake Spotify simulation
-        run: |
-          mkdir fakebin
-          echo '#!/bin/bash' > fakebin/playerctl
-          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
-          chmod +x fakebin/playerctl
-
-          export PATH="$PWD/fakebin:$PATH"
-          timeout 2 bash spotify-adblock.sh || true
-
-      - name: Test install script
+      - name: Run install script
         run: |
           export HOME=/tmp/test-home
           mkdir -p $HOME
           bash install.sh
 
-      - name: Verify install
+      - name: Verify & Test Installed Script
         run: |
-          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
-          echo "Installation verified on Ubuntu ✅"
+          export HOME=/tmp/test-home
+          TARGET="$HOME/.local/bin/spotify-adblock.sh"
+          
+          echo "1. Checking if file exists..."
+          test -f "$TARGET"
+          
+          echo "2. Syntax check..."
+          bash -n "$TARGET"
+          
+          echo "3. Shellcheck..."
+          shellcheck "$TARGET"
+          shellcheck install.sh
+          
+          echo "4. Fake Spotify simulation..."
+          mkdir -p fakebin
+          echo '#!/bin/bash' > fakebin/playerctl
+          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
+          chmod +x fakebin/playerctl
+
+          export PATH="$PWD/fakebin:$PATH"
+          timeout 2 bash "$TARGET" || true
+          
+          echo "Ubuntu tests passed ✅"
 
 # =========================
 # 🔵 Fedora test (container)
@@ -64,27 +60,38 @@ jobs:
       image: fedora:latest
 
     steps:
-      - name: Install tools
-        run: dnf install -y git bash curl playerctl libnotify
-
       - uses: actions/checkout@v4
 
-      - name: Syntax check
-        run: bash -n spotify-adblock.sh
+      - name: Install tools
+        run: dnf install -y git bash curl playerctl libnotify sudo
 
-      - name: Test script run
-        run: timeout 2 bash spotify-adblock.sh || true
-
-      - name: Test install script
+      - name: Run install script
         run: |
           export HOME=/tmp/test-home
           mkdir -p $HOME
           bash install.sh
 
-      - name: Verify install
+      - name: Verify & Test Installed Script
         run: |
-          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
-          echo "Installation verified on Fedora ✅"
+          export HOME=/tmp/test-home
+          TARGET="$HOME/.local/bin/spotify-adblock.sh"
+          
+          echo "1. Checking if file exists..."
+          test -f "$TARGET"
+          
+          echo "2. Syntax check..."
+          bash -n "$TARGET"
+          
+          echo "3. Fake Spotify simulation..."
+          mkdir -p fakebin
+          echo '#!/bin/bash' > fakebin/playerctl
+          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
+          chmod +x fakebin/playerctl
+
+          export PATH="$PWD/fakebin:$PATH"
+          timeout 2 bash "$TARGET" || true
+          
+          echo "Fedora tests passed ✅"
 
 # =========================
 # 🟣 Arch test (container)
@@ -96,29 +103,40 @@ jobs:
       image: archlinux:latest
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Arch
         run: |
           pacman -Sy --noconfirm
-          pacman -S --noconfirm git bash curl playerctl libnotify
+          pacman -S --noconfirm git bash curl playerctl libnotify sudo
 
-      - uses: actions/checkout@v4
-
-      - name: Syntax check
-        run: bash -n spotify-adblock.sh
-
-      - name: Test script run
-        run: timeout 2 bash spotify-adblock.sh || true
-        
-      - name: Test install script
+      - name: Run install script
         run: |
           export HOME=/tmp/test-home
           mkdir -p $HOME
           bash install.sh
 
-      - name: Verify install
+      - name: Verify & Test Installed Script
         run: |
-          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
-          echo "Installation verified on Arch Linux ✅"
+          export HOME=/tmp/test-home
+          TARGET="$HOME/.local/bin/spotify-adblock.sh"
+          
+          echo "1. Checking if file exists..."
+          test -f "$TARGET"
+          
+          echo "2. Syntax check..."
+          bash -n "$TARGET"
+          
+          echo "3. Fake Spotify simulation..."
+          mkdir -p fakebin
+          echo '#!/bin/bash' > fakebin/playerctl
+          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
+          chmod +x fakebin/playerctl
+
+          export PATH="$PWD/fakebin:$PATH"
+          timeout 2 bash "$TARGET" || true
+          
+          echo "Arch Linux tests passed ✅"
 
 # =========================
 # 🧠 Unit tests (logic)
