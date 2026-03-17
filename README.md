@@ -4,58 +4,54 @@
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![Platform](https://img.shields.io/badge/Platform-Linux-FCC624.svg)](https://www.linux.org/)
 
-A robust, ultra-lightweight Bash script for Linux that automatically detects and skips audio advertisements in the Flatpak version of Spotify. It works silently in the background, ensuring an uninterrupted listening experience without modifying the Spotify binary itself.
+> Skip Spotify ads instantly on Linux (Flatpak) with near-zero CPU usage.
+
+A lightweight Bash script that automatically detects and skips audio advertisements in the Flatpak version of Spotify.
 
 ---
 
-## 📑 Table of Contents
+## ✨ Features
 
-* [Key Features](#-key-features)
-* [Prerequisites & Dependencies](#-prerequisites--dependencies)
-* [Installation & Usage](#-installation--usage)
-
-  * [Automated Installation](#option-a-automated-installation-recommended)
-  * [Manual Installation](#option-b-detailed-manual-installation)
-* [Updating the Script](#-updating)
-* [How It Works (Under the Hood)](#-how-it-works-under-the-hood)
-* [Troubleshooting & FAQ](#️-troubleshooting--faq)
-* [Uninstallation](#-uninstallation)
-* [Contributing](#-contributing)
-* [License & Disclaimer](#️-license--disclaimer)
+* 🚫 No Spotify binary modification
+* ⚡ Event-driven (almost zero CPU usage)
+* 🔁 Automatic restart when ads are detected
+* 🔕 Optional notifications
+* 🚀 Autostart support
 
 ---
 
-## ✨ Key Features
+## 📋 Requirements
 
-* **Zero Modifications:** Does not alter Spotify's core files, avoiding potential account bans or breaking updates.
-* **Minimal Resource Usage:** Uses event-driven MPRIS metadata tracking (`playerctl --follow`) instead of heavy CPU polling.
-* **Seamless Resumption:** Instantly kills the client when an ad is detected and relaunches it minimized.
-* **Smart Loop Prevention:** Prevents endless restart loops if Spotify fails to load properly.
-* **Set-and-Forget:** Optional auto-start setup on system boot.
-* **Native Notifications:** Shows desktop notifications when an ad is skipped.
+### Spotify (Flatpak)
+
+```bash
+flatpak install flathub com.spotify.Client
+```
 
 ---
 
-## 📋 Prerequisites & Dependencies
+## 📦 Dependencies (by distro)
 
-Make sure you are using the **Flatpak version of Spotify (`com.spotify.Client`)**.
-
-Install required dependencies:
-
-### Ubuntu, Pop!_OS, Linux Mint, Debian
+### 🟢 Ubuntu / Debian / Linux Mint / Pop!_OS
 
 ```bash
 sudo apt update
 sudo apt install playerctl libnotify-bin
 ```
 
-### Fedora
+---
+
+### 🔵 Fedora
 
 ```bash
 sudo dnf install playerctl libnotify
 ```
 
-### Arch Linux, Manjaro, EndeavourOS
+> ℹ️ Notifications work out-of-the-box on Fedora GNOME (Wayland)
+
+---
+
+### ⚫ Arch Linux / Manjaro / EndeavourOS
 
 ```bash
 sudo pacman -S playerctl libnotify
@@ -63,11 +59,34 @@ sudo pacman -S playerctl libnotify
 
 ---
 
-# 🚀 Installation & Usage
+### 🟣 openSUSE
 
-## Option A: Automated Installation (Recommended)
+```bash
+sudo zypper install playerctl libnotify-tools
+```
 
-Run:
+---
+
+### 🪟 Window managers (i3, sway, bspwm…)
+
+You also need a notification daemon:
+
+```bash
+sudo pacman -S dunst   # Arch
+sudo apt install dunst # Debian/Ubuntu
+```
+
+or:
+
+```bash
+sudo pacman -S mako    # Wayland
+```
+
+---
+
+# 🚀 Installation
+
+## Quick install
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
@@ -75,108 +94,187 @@ curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main
 
 ---
 
-## Option B: Detailed Manual Installation
-
-### 1. Clone the repository
+## Manual install (from repo)
 
 ```bash
 git clone https://github.com/Petr200/Spotify-adblock-flatpak.git
 cd Spotify-adblock-flatpak
-```
 
-### 2. Make the script executable
-
-```bash
 chmod +x spotify-skipper.sh
-```
-
-### 3. Test the script
-
-```bash
 ./spotify-skipper.sh
 ```
 
-(Open Spotify, play music, wait for an ad. Stop with `Ctrl + C`.)
+---
 
-### 4. Run in background
+# ⚙️ How It Works
+
+1. Listens to Spotify using:
 
 ```bash
-nohup ./spotify-skipper.sh >/dev/null 2>&1 &
+playerctl --follow
+```
+
+2. Detects ads via:
+
+```
+spotify/ad
+```
+
+3. When ad is detected:
+
+```bash
+flatpak kill com.spotify.Client
+flatpak run com.spotify.Client --minimized
+```
+
+4. Waits for restart and resumes playback
+
+---
+
+# ⚙️ Configuration
+
+## 🔕 Disable notifications
+
+Edit:
+
+```bash
+nano spotify-skipper.sh
+```
+
+Comment/remove:
+
+```bash
+notify-send ...
 ```
 
 ---
 
-# 🔄 Updating
+## 🪟 About `--minimized`
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
+flatpak run com.spotify.Client --minimized
+```
+
+### Behavior depends on environment:
+
+| Environment | Works             |
+| ----------- | ----------------- |
+| GNOME       | ✅ Yes             |
+| KDE Plasma  | ✅ Yes*            |
+| XFCE        | ⚠️ Mixed          |
+| i3 / sway   | ❌ Usually ignored |
+
+*Tested on Fedora KDE Plasma 
+
+### Alternatives
+
+#### Always open window:
+
+```bash
+flatpak run com.spotify.Client
+```
+
+#### WM rule example (i3):
+
+```bash
+for_window [class="Spotify"] move scratchpad
 ```
 
 ---
 
-# ⚙️ How It Works (Under the Hood)
+## 🔁 Ensure only one instance runs
 
-* **Monitoring:** `playerctl --follow`
-* **Detection:** Looks for `spotify/ad` in track ID
-* **Execution:**
+### Lock file (recommended)
 
-  ```bash
-  flatpak kill com.spotify.Client
-  ```
-* **Recovery:** Relaunches Spotify minimized
-* **Resume:** Waits and resumes playback if paused
+```bash
+LOCKFILE="/tmp/spotify-skipper.lock"
+
+if [ -e "$LOCKFILE" ]; then
+    echo "Already running"
+    exit 1
+fi
+
+trap "rm -f $LOCKFILE" EXIT
+touch "$LOCKFILE"
+```
 
 ---
 
-# 🛠️ Troubleshooting & FAQ
+# 🔔 Notifications
 
-### Ads are not skipping
+Uses:
+
+```bash
+notify-send
+```
+
+### Works out of the box on:
+
+* ✅ GNOME (Ubuntu, Fedora)
+* ✅ KDE (with notification service)
+* ✅ XFCE
+
+### Requires extra setup:
+
+* ⚠️ i3 → install `dunst`
+* ⚠️ Wayland → install `mako`
+
+### Test notifications:
+
+```bash
+notify-send "Test" "It works!"
+```
+
+If nothing appears → missing notification daemon
+
+---
+
+# 🛠️ Troubleshooting
+
+### Ads not skipping
 
 ```bash
 flatpak list | grep spotify
 ```
 
-Ensure `com.spotify.Client` appears.
+---
+
+### Script not running
+
+```bash
+ps aux | grep spotify-skipper
+```
 
 ---
 
 ### Spotify opens in foreground
 
-Some desktop environments ignore `--minimized`.
+→ `--minimized` not supported by your DE
 
 ---
 
-### No notifications
+### Notifications not working
 
-Install a notification daemon (`dunst`, `mako`, etc.).
-
----
-
-### Is it safe?
-
-Yes. No modification of Spotify binaries or account data.
+```bash
+notify-send "Test"
+```
 
 ---
 
-# 🗑️ Uninstallation
+# 🗑️ Uninstall
 
 ```bash
 pkill -f spotify-skipper.sh
 rm ~/.local/bin/spotify-skipper.sh
 rm ~/.config/autostart/spotify-skipper.desktop
+rm /tmp/spotify-skipper.lock
 ```
 
 ---
 
-# 🤝 Contributing
+# ⚖️ Disclaimer
 
-Pull requests and issues are welcome.
+This project does not modify Spotify binaries.
+However, it may violate Spotify Terms of Service.
 
----
-
-# ⚖️ License & Disclaimer
-
-MIT License.
-
-**Disclaimer:**
-This project is for educational purposes only and is not affiliated with Spotify AB. Use at your own risk.
+Use at your own risk.
