@@ -7,23 +7,40 @@
 > Skip Spotify ads instantly on Linux (Flatpak) with near-zero CPU usage.
 
 A lightweight Bash script that automatically detects and skips audio advertisements in the Flatpak version of Spotify.
-
-Includes **single-instance protection** via `flock` so you can safely autostart it without duplicates.
+Includes **single-instance protection** via `flock` so it can safely run in the background.
 
 ---
 
-## ✨ Features
+## 📑 Table of Contents
+
+* [✨ Key Features](#-key-features)
+* [📋 Prerequisites](#-prerequisites)
+* [🚀 Installation](#-installation)
+
+  * [Quick Install (One Command)](#quick-install-one-command)
+  * [Manual Installation](#manual-installation)
+  * [What the Installer Does](#what-the-installer-does)
+* [⚙️ Configuration & Customization](#-configuration--customization)
+* [🔄 Updating](#-updating)
+* [⚙️ How It Works](#-how-it-works)
+* [🛠️ Troubleshooting](#-troubleshooting)
+* [🗑️ Uninstallation](#-uninstallation)
+* [⚖️ Disclaimer](#-disclaimer)
+
+---
+
+## ✨ Key Features
 
 * 🚫 No Spotify binary modification
 * ⚡ Event-driven (almost zero CPU usage)
 * 🔁 Automatic restart when ads are detected
 * 🔕 Optional notifications
-* 🛡️ Single instance guaranteed (`flock`)
+* 🛡️ Single instance guaranteed via `flock`
 * 🚀 Autostart support
 
 ---
 
-## 📋 Requirements
+## 📋 Prerequisites
 
 ### Spotify (Flatpak)
 
@@ -72,64 +89,44 @@ sudo pacman -S mako   # Wayland
 
 ---
 
-# 🚀 Installation
+## 🚀 Installation
 
-## Quick install
+### Quick Install (One Command)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
 ```
 
-## Manual install (from repo)
+### Manual Installation
 
 ```bash
 git clone https://github.com/Petr200/Spotify-adblock-flatpak.git
 cd Spotify-adblock-flatpak
-chmod +x Spotify-adblock.sh
-./Spotify-adblock.sh
+chmod +x spotify-skipper.sh
+./spotify-skipper.sh
 ```
+
+### What the Installer Does
+
+* Downloads the script to `~/.local/bin`
+* Makes it executable
+* Creates autostart entry (`~/.config/autostart`)
+* Stops any old instance (if exists)
+* Starts it in the background
 
 ---
 
-# ⚙️ How It Works
+## ⚙️ Configuration & Customization
 
-1. **Listens to Spotify** using:
+### 🔕 Disable notifications
 
-```bash
-playerctl --follow
-```
-
-2. **Detects ads** via track IDs containing:
-
-```text
-spotify/ad
-```
-
-3. **Skips ads**:
-
-```bash
-flatpak kill com.spotify.Client
-flatpak run com.spotify.Client --minimized
-```
-
-4. **Resumes playback** if paused.
-
-5. **Single instance protection**:
-   The script uses `flock` on `/tmp/spotify-adblock.lock` to prevent multiple copies from running.
-
----
-
-# ⚙️ Configuration
-
-## 🔕 Disable notifications
-
-Edit `Spotify-adblock.sh` and comment/remove lines with:
+Edit `spotify-skipper.sh` and comment/remove lines with:
 
 ```bash
 notify-send ...
 ```
 
-## 🪟 About `--minimized`
+### 🪟 About `--minimized`
 
 ```bash
 flatpak run com.spotify.Client --minimized
@@ -143,9 +140,9 @@ flatpak run com.spotify.Client --minimized
 | XFCE              | ⚠️ Sometimes      |
 | i3 / sway         | ❌ Usually ignored |
 
-### Alternatives
+**Alternatives**
 
-* Remove minimized → always open window:
+* Always open window:
 
 ```bash
 flatpak run com.spotify.Client
@@ -157,9 +154,7 @@ flatpak run com.spotify.Client
 for_window [class="Spotify"] move scratchpad
 ```
 
----
-
-## 🔁 Ensure only one instance
+### 🔁 Single instance
 
 Already built-in using `flock`:
 
@@ -173,20 +168,26 @@ fi
 
 ---
 
-# 🔔 Notifications
-
-* Works out-of-the-box on GNOME/KDE
-* On tiling WMs / Wayland, install `dunst` or `mako`
-
-Test notifications:
+## 🔄 Updating
 
 ```bash
-notify-send "Test" "Notifications are working!"
+curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
 ```
 
 ---
 
-# 🛠️ Troubleshooting
+## ⚙️ How It Works
+
+1. Listens to Spotify using `playerctl --follow`
+2. Detects ads via track IDs containing `spotify/ad`
+3. Kills Spotify if an ad is detected
+4. Restarts Spotify with `--minimized`
+5. Resumes playback
+6. Ensures only one instance is running via `flock`
+
+---
+
+## 🛠️ Troubleshooting
 
 * Ads not skipping:
 
@@ -202,20 +203,22 @@ ps aux | grep spotify-skipper
 
 * Spotify opens in foreground → `--minimized` ignored by your DE/WM
 
+* Notifications not working → check if `notify-send` is installed and daemon is running
+
 ---
 
-# 🗑️ Uninstall
+## 🗑️ Uninstallation
 
 ```bash
-pkill -f Spotify-adblock.sh
-rm ~/.local/bin/Spotify-adblock.sh
+pkill -f spotify-skipper.sh
+rm ~/.local/bin/spotify-skipper.sh
 rm ~/.config/autostart/spotify-skipper.desktop
 rm /tmp/spotify-adblock.lock
 ```
 
 ---
 
-# ⚖️ Disclaimer
+## ⚖️ Disclaimer
 
 * No Spotify binaries are modified
 * May violate Spotify Terms of Service
