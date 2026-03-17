@@ -10,10 +10,10 @@ mkdir -p ~/.local/bin
 mkdir -p ~/.config/autostart
 
 # Download the main script (Spotify-adblock.sh) from repo
-curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/Spotify-adblock.sh -o ~/.local/bin/Spotify-adblock.sh
+curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/Spotify-adblock.sh -o ~/.local/bin/spotify-adblock.sh
 
 # Make it executable
-chmod +x ~/.local/bin/Spotify-adblock.sh
+chmod +x ~/.local/bin/spotify-adblock.sh
 
 # Create autostart .desktop file
 cat <<EOF > ~/.config/autostart/spotify-adblock.desktop
@@ -29,10 +29,10 @@ X-GNOME-Autostart-enabled=true
 EOF
 
 # Kill any previous running instance
-pkill -f Spotify-adblock.sh 2>/dev/null
+pkill -f spotify-adblock.sh 2>/dev/null
 
 # Start the script in the background
-nohup ~/.local/bin/Spotify-adblock.sh >/dev/null 2>&1 &
+nohup ~/.local/bin/spotify-adblock.sh >/dev/null 2>&1 &
 
 echo "Installation complete! Spotify Adblock is running in the background and will start automatically with your PC."
 
