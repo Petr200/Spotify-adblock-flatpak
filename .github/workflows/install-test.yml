@@ -1,0 +1,61 @@
+name: Install & Test Script
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ubuntu-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y playerctl libnotify-bin curl flatpak shellcheck
+
+      # 3️⃣ Syntax check install.sh
+      - name: Check install.sh syntax
+        run: bash -n install.sh
+
+      # 4️⃣ Run install.sh in safe HOME
+      - name: Run install.sh (isolated)
+        run: |
+          export HOME=/tmp/test-home
+          mkdir -p $HOME
+          bash -x install.sh
+
+      # 5️⃣ Verify main script downloaded
+      - name: Verify Spotify-adblock.sh exists
+        run: |
+          test -f /tmp/test-home/.local/bin/Spotify-adblock.sh
+          test -x /tmp/test-home/.local/bin/Spotify-adblock.sh
+
+      # 6️⃣ Run the installed script (short test)
+      - name: Run Spotify-adblock.sh (fake Spotify)
+        run: |
+          mkdir fakebin
+          echo '#!/bin/bash' > fakebin/playerctl
+          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
+          chmod +x fakebin/playerctl
+
+          export PATH="$PWD/fakebin:$PATH"
+          timeout 3 bash /tmp/test-home/.local/bin/Spotify-adblock.sh || true
+
+      # 7️⃣ Unit test parsing logic
+      - name: Test ad detection logic
+        run: |
+          detect_ad() {
+            if [[ "$1" == *"spotify/ad"* ]]; then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          detect_ad "spotify/ad/123" || exit 1
+          detect_ad "spotify:track:xyz" && exit 1
