@@ -85,8 +85,8 @@ curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main
 ```bash
 git clone https://github.com/Petr200/Spotify-adblock-flatpak.git
 cd Spotify-adblock-flatpak
-chmod +x spotify-skipper.sh
-./spotify-skipper.sh
+chmod +x Spotify-adblock.sh
+./Spotify-adblock.sh
 ```
 
 ---
@@ -123,7 +123,7 @@ flatpak run com.spotify.Client --minimized
 
 ## 🔕 Disable notifications
 
-Edit `spotify-skipper.sh` and comment/remove lines with:
+Edit `Spotify-adblock.sh` and comment/remove lines with:
 
 ```bash
 notify-send ...
@@ -207,8 +207,8 @@ ps aux | grep spotify-skipper
 # 🗑️ Uninstall
 
 ```bash
-pkill -f spotify-skipper.sh
-rm ~/.local/bin/spotify-skipper.sh
+pkill -f Spotify-adblock.sh
+rm ~/.local/bin/Spotify-adblock.sh
 rm ~/.config/autostart/spotify-skipper.desktop
 rm /tmp/spotify-adblock.lock
 ```
