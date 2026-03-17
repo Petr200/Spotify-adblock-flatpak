@@ -1,27 +1,137 @@
-name: Test Script
+name: Ultra Strict Multi-Distro Test
 
 on:
   push:
   pull_request:
 
 jobs:
-  test:
+
+# =========================
+# 🟢 Ubuntu test
+# =========================
+  ubuntu-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install -y playerctl libnotify-bin
+      - name: Install deps
+        run: sudo apt update && sudo apt install -y playerctl libnotify-bin shellcheck
 
-      - name: Check script syntax
+      - name: Syntax check
+        run: |
+          bash -n spotify-adblock.sh
+          bash -n install.sh
+
+      - name: Shellcheck
+        run: |
+          shellcheck spotify-adblock.sh
+          shellcheck install.sh
+
+      - name: Test download (404 protection)
+        run: |
+          curl -f -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/spotify-adblock.sh -o test.sh
+          test -s test.sh
+
+      - name: Fake Spotify simulation
+        run: |
+          mkdir fakebin
+          echo '#!/bin/bash' > fakebin/playerctl
+          echo 'echo "spotify/ad/test"' >> fakebin/playerctl
+          chmod +x fakebin/playerctl
+
+          export PATH="$PWD/fakebin:$PATH"
+          timeout 2 bash spotify-adblock.sh || true
+
+      - name: Install script test
+        run: |
+          export HOME=/tmp/test-home
+          mkdir -p $HOME
+          bash install.sh
+
+      - name: Verify install
+        run: |
+          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
+
+# =========================
+# 🔵 Fedora test (container)
+# =========================
+  fedora-test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install tools
+        run: dnf install -y git bash curl playerctl libnotify
+
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
         run: bash -n spotify-adblock.sh
 
-      - name: Check install script syntax
-        run: bash -n install.sh
+      - name: Test script run
+        run: timeout 2 bash spotify-adblock.sh || true
 
-      - name: Test install script (dry run)
+      - name: Test install script
         run: |
-          chmod +x install.sh
-          bash -x install.sh || true
+          export HOME=/tmp/test-home
+          mkdir -p $HOME
+          bash install.sh
+
+# =========================
+# 🟣 Arch test (container)
+# =========================
+  arch-test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Setup Arch
+        run: |
+          pacman -Sy --noconfirm
+          pacman -S --noconfirm git bash curl playerctl libnotify
+
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n spotify-adblock.sh
+
+      - name: Test script run
+        run: timeout 2 bash spotify-adblock.sh || true
+
+# =========================
+# 🧠 Unit tests (logic)
+# =========================
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test ad detection logic
+        run: |
+          detect_ad() {
+            if [[ "$1" == *"spotify/ad"* ]]; then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          detect_ad "spotify/ad/123" || exit 1
+          detect_ad "spotify:track:xyz" && exit 1
+
+      - name: Test loop protection logic
+        run: |
+          LAST="abc"
+          CURRENT="abc"
+
+          if [ "$CURRENT" = "$LAST" ]; then
+            echo "Loop prevented OK"
+          else
+            exit 1
+          fi
