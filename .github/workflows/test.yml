@@ -43,7 +43,7 @@ jobs:
           export PATH="$PWD/fakebin:$PATH"
           timeout 2 bash spotify-adblock.sh || true
 
-      - name: Install script test
+      - name: Test install script
         run: |
           export HOME=/tmp/test-home
           mkdir -p $HOME
@@ -52,6 +52,7 @@ jobs:
       - name: Verify install
         run: |
           test -f /tmp/test-home/.local/bin/spotify-adblock.sh
+          echo "Installation verified on Ubuntu ✅"
 
 # =========================
 # 🔵 Fedora test (container)
@@ -80,6 +81,11 @@ jobs:
           mkdir -p $HOME
           bash install.sh
 
+      - name: Verify install
+        run: |
+          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
+          echo "Installation verified on Fedora ✅"
+
 # =========================
 # 🟣 Arch test (container)
 # =========================
@@ -102,9 +108,21 @@ jobs:
 
       - name: Test script run
         run: timeout 2 bash spotify-adblock.sh || true
- # =========================
- # 🧠 Unit tests (logic)
- # =========================
+        
+      - name: Test install script
+        run: |
+          export HOME=/tmp/test-home
+          mkdir -p $HOME
+          bash install.sh
+
+      - name: Verify install
+        run: |
+          test -f /tmp/test-home/.local/bin/spotify-adblock.sh
+          echo "Installation verified on Arch Linux ✅"
+
+# =========================
+# 🧠 Unit tests (logic)
+# =========================
   unit-tests:
     runs-on: ubuntu-latest
 
