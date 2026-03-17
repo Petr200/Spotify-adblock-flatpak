@@ -1,6 +1,5 @@
 # 🎧 Spotify Adblock Flatpak
 ![CI](https://github.com/Petr200/Spotify-adblock-flatpak/actions/workflows/test.yml/badge.svg)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![Platform](https://img.shields.io/badge/Platform-Linux-FCC624.svg)](https://www.linux.org/)
