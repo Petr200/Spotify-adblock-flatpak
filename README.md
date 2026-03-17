@@ -102,8 +102,8 @@ curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main
 ```bash
 git clone https://github.com/Petr200/Spotify-adblock-flatpak.git
 cd Spotify-adblock-flatpak
-chmod +x spotify-skipper.sh
-./spotify-skipper.sh
+chmod +x Spotify-adblock.sh
+./Spotify-adblock.sh
 ```
 
 ### What the Installer Does
@@ -120,7 +120,7 @@ chmod +x spotify-skipper.sh
 
 ### 🔕 Disable notifications
 
-Edit `spotify-skipper.sh` and comment/remove lines with:
+Edit `Spotify-adblock.sh` and comment/remove lines with:
 
 ```bash
 notify-send ...
@@ -198,7 +198,7 @@ flatpak list | grep spotify
 * Script not running:
 
 ```bash
-ps aux | grep spotify-skipper
+ps aux | grep Spotify-adblock
 ```
 
 * Spotify opens in foreground → `--minimized` ignored by your DE/WM
@@ -210,9 +210,9 @@ ps aux | grep spotify-skipper
 ## 🗑️ Uninstallation
 
 ```bash
-pkill -f spotify-skipper.sh
-rm ~/.local/bin/spotify-skipper.sh
-rm ~/.config/autostart/spotify-skipper.desktop
+pkill -f Spotify-adblock.sh
+rm ~/.local/bin/Spotify-adblock.sh
+rm ~/.config/autostart/Spotify-adblock.desktop
 rm /tmp/spotify-adblock.lock
 ```
 
