@@ -1,13 +1,12 @@
-# 🎧 Spotify Adblock Flatpak
-![CI](https://github.com/Petr200/Spotify-adblock-flatpak/actions/workflows/test.yml/badge.svg)
+# 🎵 Spotify Adblock — Flatpak Edition
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![Platform](https://img.shields.io/badge/Platform-Linux-FCC624.svg)](https://www.linux.org/)
 
-> Skip Spotify ads instantly on Linux (Flatpak) with near-zero CPU usage.
+> Automatically skips Spotify ads by restarting the Flatpak instance. No patching, no modified binaries — just smart monitoring.
 
-A lightweight Bash script that automatically detects and skips audio advertisements in the Flatpak version of Spotify.
-Includes **single-instance protection** via `flock` so it can safely run in the background.
+A lightweight Bash script that detects audio advertisements in the Flatpak version of Spotify and skips them instantly.
+Includes **single-instance protection** via `flock` so it safely runs in the background.
 
 ---
 
@@ -32,79 +31,68 @@ Includes **single-instance protection** via `flock` so it can safely run in the 
 ## ✨ Key Features
 
 * 🚫 No Spotify binary modification
-* ⚡ Event-driven (almost zero CPU usage)
-* 🔁 Automatic restart when ads are detected
-* 🔕 Optional notifications
+* ⚡ Event-driven — near-zero CPU usage
+* 🔁 Automatic Spotify restart when an ad is detected
+* 🔔 Desktop notifications via `libnotify`
 * 🛡️ Single instance guaranteed via `flock`
-* 🚀 Autostart support
+* 🚀 Autostart on login support
 
 ---
 
 ## 📋 Prerequisites
 
-## 1️⃣ Install Flatpak (if not installed)
+### 1️⃣ Install Flatpak (if not installed)
 
-### Ubuntu / Debian
-
+#### Ubuntu / Debian
 ```bash
 sudo apt install flatpak
 ```
 
-### Fedora
-
+#### Fedora
 ```bash
 sudo dnf install flatpak
 ```
 
-### Arch / Manjaro
-
+#### Arch / Manjaro
 ```bash
 sudo pacman -S flatpak
 ```
 
 ---
 
-## 2️⃣ Add Flathub repository
-
+### 2️⃣ Add Flathub repository
 ```bash
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 ```
 
 ---
 
-## 3️⃣ Install Spotify (Flatpak)
-
+### 3️⃣ Install Spotify (Flatpak)
 ```bash
 flatpak install flathub com.spotify.Client
 ```
 
 ---
 
-## 4️⃣ Install dependencies
+### 4️⃣ Install dependencies
 
-### Ubuntu / Debian / Mint / Pop!_OS
-
+#### Ubuntu / Debian / Mint / Pop!_OS
 ```bash
 sudo apt update
 sudo apt install playerctl libnotify-bin
 ```
 
-### Fedora
-
+#### Fedora
 ```bash
 sudo dnf install playerctl libnotify
 ```
 
-> ℹ️ Notifications and `--minimized` work perfectly on Fedora KDE Plasma.
-
-### Arch / Manjaro
-
+#### Arch / Manjaro
 ```bash
 sudo pacman -S playerctl libnotify
 ```
 
-### openSUSE
-
+#### openSUSE
 ```bash
 sudo zypper install playerctl libnotify-tools
 ```
@@ -113,32 +101,30 @@ sudo zypper install playerctl libnotify-tools
 
 ## 🚀 Installation
 
-## Quick Install (One Command)
-
+### Quick Install (One Command)
 ```bash
 curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
 ```
 
 ---
 
-## Manual Installation
-
+### Manual Installation
 ```bash
 git clone https://github.com/Petr200/Spotify-adblock-flatpak.git
 cd Spotify-adblock-flatpak
 chmod +x spotify-adblock.sh
-./spotify-adblock.sh
+./spotify-adblock.sh &
 ```
 
 ---
 
-## What the Installer Does
+### What the Installer Does
 
-* Downloads script to `~/.local/bin/spotify-adblock.sh`
+* Downloads the script to `~/.local/bin/spotify-adblock.sh`
 * Makes it executable
-* Creates autostart entry (`~/.config/autostart/spotify-adblock.desktop`)
-* Stops any old instance
-* Starts script in background
+* Creates an autostart entry at `~/.config/autostart/spotify-adblock.desktop`
+* Stops any previously running instance
+* Starts the script in the background
 
 ---
 
@@ -146,51 +132,48 @@ chmod +x spotify-adblock.sh
 
 ### 🔕 Disable notifications
 
-Edit:
-
+Edit the script:
 ```bash
 ~/.local/bin/spotify-adblock.sh
 ```
 
-Comment/remove:
-
+Comment out or remove the `notify-send` lines:
 ```bash
-notify-send ...
+# notify-send ...
 ```
 
 ---
 
 ### 🪟 About `--minimized`
 
+Spotify is restarted with:
 ```bash
 flatpak run com.spotify.Client --minimized
 ```
 
-| Environment       | Works?       |
-| ----------------- | ------------ |
-| Fedora KDE Plasma | ✅ Fully      |
-| Fedora GNOME      | ✅ Usually    |
-| Ubuntu GNOME      | ✅ Yes        |
-| XFCE              | ⚠️ Sometimes |
-| i3 / sway         | ❌ Ignored    |
+| Environment       | Works?        |
+| ----------------- | ------------- |
+| Fedora KDE Plasma | ✅ Fully       |
+| Fedora GNOME      | ✅ Usually     |
+| Ubuntu GNOME      | ✅ Yes         |
+| XFCE              | ⚠️ Sometimes  |
+| i3 / sway         | ❌ Ignored     |
 
 **Alternatives**
 
-Always open window:
-
+Always open the window:
 ```bash
 flatpak run com.spotify.Client
 ```
 
-i3 workaround:
-
+i3 workaround — add to your i3 config:
 ```bash
 for_window [class="Spotify"] move scratchpad
 ```
 
 ---
 
-### 🔁 Single instance protection
+### 🛡️ Single instance protection
 
 ```bash
 exec {LOCK_FD}>/tmp/spotify-adblock.lock
@@ -204,6 +187,7 @@ fi
 
 ## 🔄 Updating
 
+Re-run the installer to update to the latest version:
 ```bash
 curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main/install.sh | bash
 ```
@@ -212,43 +196,34 @@ curl -sSL https://raw.githubusercontent.com/Petr200/Spotify-adblock-flatpak/main
 
 ## ⚙️ How It Works
 
-1. Monitors Spotify via `playerctl --follow`
-2. Detects ads (`spotify/ad`)
-3. Kills Spotify when ad appears
-4. Restarts it with `--minimized`
-5. Resumes playback
-6. Prevents duplicate instances via `flock`
+1. Monitors Spotify metadata changes via `playerctl --follow`
+2. Detects ads by checking if the track ID contains `spotify/ad`
+3. Kills the Spotify Flatpak process
+4. Restarts Spotify with `--minimized`
+5. Waits until Spotify is fully loaded, then resumes playback
+6. Prevents duplicate script instances via `flock`
 
 ---
 
 ## 🛠️ Troubleshooting
 
 ### Script downloaded incorrectly (404)
-
 ```bash
 cat ~/.local/bin/spotify-adblock.sh
 ```
 
-If you see:
-
-```
-404: Not Found
-```
-
-→ reinstall.
+If you see `404: Not Found` → reinstall using the quick install command above.
 
 ---
 
-### Check Spotify
-
+### Check if Spotify Flatpak is installed
 ```bash
 flatpak list | grep spotify
 ```
 
 ---
 
-### Check script running
-
+### Check if the script is running
 ```bash
 ps aux | grep spotify-adblock
 ```
@@ -256,7 +231,6 @@ ps aux | grep spotify-adblock
 ---
 
 ### Debug mode
-
 ```bash
 bash -x ~/.local/bin/spotify-adblock.sh
 ```
@@ -265,8 +239,7 @@ bash -x ~/.local/bin/spotify-adblock.sh
 
 ### Notifications not working
 
-Install daemon:
-
+Install a notification daemon:
 ```bash
 sudo apt install dunst
 ```
@@ -287,5 +260,5 @@ rm /tmp/spotify-adblock.lock
 ## ⚖️ Disclaimer
 
 * No Spotify binaries are modified
-* May violate Spotify Terms of Service
+* This script may violate Spotify's Terms of Service
 * Use at your own risk
